@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Package, ShoppingCart, ArrowRightLeft, DollarSign, AlertTriangle, Search, FileText, Receipt, Users, Truck } from "lucide-react";
 import { motion } from "framer-motion";
+
+type Client = { id: number; name: string; phone: string; email: string; address: string };
+type Project = { id: number; name: string; clientId: number; status: string; labor: number; notes: string };
+type Supplier = { id: number; name: string; phone: string; email: string; address: string; terms: string };
+type Item = { id: number; name: string; category: string; sku: string; qty: number; unit: string; cost: number; supplier: string; minQty: number };
+type Purchase = { id: number; date: string; item: string; qty: number; unitCost: number; supplier: string };
+type Movement = { id?: number; date: string; type: "OUT" | "IN"; project: string; item: string; qty: number; note: string };
+type Sale = { id: number; date: string; project: string; item: string; qty: number; cost: number; markup: number };
+type EstimateRow = { id: number; item: string; qty: number };
+type Estimate = { id: number; date: string; project: string; clientName: string; rows: EstimateRow[]; labor: number; notes: string; materialTotal: number; total: number };
+type Invoice = { id: number; number: string; date: string; estimateId: number; project: string; clientName: string; total: number; status: "Unpaid" | "Paid" };
+type StatCardProps = { title: string; value: string | number; icon: React.ComponentType<{ className?: string }>; hint: string };
 
 const initialClients = [
   { id: 1, name: "Michael Brown", phone: "(818) 555-0101", email: "michael@example.com", address: "Sherman Oaks, CA" },
@@ -53,15 +66,15 @@ const initialSales = [
   { id: 2, date: "2026-03-28", project: "Studio City Office", item: "Cat6 Cable Box", qty: 1, cost: 118, markup: 30 },
 ];
 
-function currency(v) {
+function currency(v: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(v || 0);
 }
 
-function pct5(v) {
+function pct5(v: number | string) {
   return Math.round(Number(v || 0) / 5) * 5;
 }
 
-function StatCard({ title, value, icon: Icon, hint }) {
+function StatCard({ title, value, icon: Icon, hint }: StatCardProps) {
   return (
     <Card className="rounded-2xl shadow-sm">
       <CardContent className="p-5">
@@ -81,15 +94,15 @@ function StatCard({ title, value, icon: Icon, hint }) {
 }
 
 export default function SmartGuardInventoryMVP() {
-  const [clients, setClients] = useState(initialClients);
-  const [projects, setProjects] = useState(initialProjects);
-  const [suppliers, setSuppliers] = useState(initialSuppliers);
-  const [items, setItems] = useState(initialItems);
-  const [purchases, setPurchases] = useState(initialPurchases);
-  const [movements, setMovements] = useState(initialMovements);
-  const [sales, setSales] = useState(initialSales);
+  const [clients, setClients] = useState<Client[]>(initialClients);
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
+  const [items, setItems] = useState<Item[]>(initialItems);
+  const [purchases, setPurchases] = useState<Purchase[]>(initialPurchases);
+  const [movements, setMovements] = useState<Movement[]>(initialMovements);
+  const [sales, setSales] = useState<Sale[]>(initialSales);
   const [defaultMarkup, setDefaultMarkup] = useState(20);
-  const [pricing, setPricing] = useState({
+  const [pricing, setPricing] = useState<Record<string, number>>({
     "Hikvision Camera 4MP": 35,
     "AJAX MotionProtect": 45,
     "Cat6 Cable Box": 30,
@@ -100,19 +113,19 @@ export default function SmartGuardInventoryMVP() {
   const [category, setCategory] = useState("all");
   const [activeTab, setActiveTab] = useState("inventory");
 
-  const [newItem, setNewItem] = useState({ name: "", category: "CCTV", sku: "", qty: "", unit: "pcs", cost: "", supplier: "", minQty: "" });
-  const [newPurchase, setNewPurchase] = useState({ date: "2026-03-29", item: "", qty: "", unitCost: "", supplier: "" });
-  const [newMovement, setNewMovement] = useState({ date: "2026-03-29", type: "OUT", project: "", item: "", qty: "", note: "" });
-  const [newClient, setNewClient] = useState({ name: "", phone: "", email: "", address: "" });
-  const [newProject, setNewProject] = useState({ name: "", clientId: "", status: "Scheduled", labor: "", notes: "" });
-  const [newSupplier, setNewSupplier] = useState({ name: "", phone: "", email: "", address: "", terms: "" });
+  const [newItem, setNewItem] = useState<{ name: string; category: string; sku: string; qty: string; unit: string; cost: string; supplier: string; minQty: string }>({ name: "", category: "CCTV", sku: "", qty: "", unit: "pcs", cost: "", supplier: "", minQty: "" });
+  const [newPurchase, setNewPurchase] = useState<{ date: string; item: string; qty: string; unitCost: string; supplier: string }>({ date: "2026-03-29", item: "", qty: "", unitCost: "", supplier: "" });
+  const [newMovement, setNewMovement] = useState<{ date: string; type: "OUT" | "IN"; project: string; item: string; qty: string; note: string }>({ date: "2026-03-29", type: "OUT", project: "", item: "", qty: "", note: "" });
+  const [newClient, setNewClient] = useState<{ name: string; phone: string; email: string; address: string }>({ name: "", phone: "", email: "", address: "" });
+  const [newProject, setNewProject] = useState<{ name: string; clientId: string; status: string; labor: string; notes: string }>({ name: "", clientId: "", status: "Scheduled", labor: "", notes: "" });
+  const [newSupplier, setNewSupplier] = useState<{ name: string; phone: string; email: string; address: string; terms: string }>({ name: "", phone: "", email: "", address: "", terms: "" });
   const [estimateProject, setEstimateProject] = useState("");
-  const [estimateRows, setEstimateRows] = useState([]);
+  const [estimateRows, setEstimateRows] = useState<EstimateRow[]>([]);
   const [estimateLabor, setEstimateLabor] = useState(0);
   const [estimateNotes, setEstimateNotes] = useState("Materials and installation included. Taxes excluded unless stated.");
-  const [selectedEstimateId, setSelectedEstimateId] = useState(null);
-  const [estimates, setEstimates] = useState([]);
-  const [invoices, setInvoices] = useState([]);
+  const [selectedEstimateId, setSelectedEstimateId] = useState<number | null>(null);
+  const [estimates, setEstimates] = useState<Estimate[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -149,8 +162,8 @@ export default function SmartGuardInventoryMVP() {
     return acc;
   }, { total: 0, paid: 0, unpaid: 0 }), [invoices]);
 
-  const getClientById = (id) => clients.find((c) => c.id === Number(id));
-  const getProjectByName = (name) => projects.find((p) => p.name === name);
+  const getClientById = (id: number | string): Client | undefined => clients.find((c) => c.id === Number(id));
+  const getProjectByName = (name: string): Project | undefined => projects.find((p) => p.name === name);
 
   const addItem = () => {
     if (!newItem.name || !newItem.sku) return;
@@ -204,7 +217,7 @@ export default function SmartGuardInventoryMVP() {
     setNewPurchase({ date: "2026-03-29", item: "", qty: "", unitCost: "", supplier: "" });
   };
 
-  const addSaleFromMovement = (movement) => {
+  const addSaleFromMovement = (movement: Movement) => {
     const matchedItem = items.find((i) => i.name === movement.item);
     if (!matchedItem || movement.type !== "OUT" || !movement.project) return;
     const markup = pricing[movement.item] ?? defaultMarkup;
@@ -249,11 +262,11 @@ export default function SmartGuardInventoryMVP() {
   const estimateTotal = estimateMaterialTotals.revenue + Number(estimateLabor || 0);
   const estimateProfit = estimateTotal - estimateMaterialTotals.cost;
 
-  const addEstimateRow = () => setEstimateRows((prev) => [{ id: Date.now(), item: "", qty: 1 }, ...prev]);
-  const updateEstimateRow = (id, patch) => setEstimateRows((prev) => prev.map((r) => r.id === id ? { ...r, ...patch } : r));
-  const removeEstimateRow = (id) => setEstimateRows((prev) => prev.filter((r) => r.id !== id));
+  const addEstimateRow = (): void => setEstimateRows((prev) => [{ id: Date.now(), item: "", qty: 1 }, ...prev]);
+  const updateEstimateRow = (id: number, patch: Partial<EstimateRow>) => setEstimateRows((prev) => prev.map((r) => r.id === id ? { ...r, ...patch } : r));
+  const removeEstimateRow = (id: number) => setEstimateRows((prev) => prev.filter((r) => r.id !== id));
 
-  const saveEstimate = () => {
+  const saveEstimate = (): void => {
     if (!estimateProject || estimateRows.length === 0) return;
     const project = getProjectByName(estimateProject);
     const record = {
@@ -271,7 +284,7 @@ export default function SmartGuardInventoryMVP() {
     setSelectedEstimateId(record.id);
   };
 
-  const createInvoiceFromEstimate = () => {
+  const createInvoiceFromEstimate = (): void => {
     const estimate = estimates.find((e) => e.id === selectedEstimateId);
     if (!estimate) return;
     setInvoices((prev) => [{
@@ -287,7 +300,7 @@ export default function SmartGuardInventoryMVP() {
     setActiveTab("invoices");
   };
 
-  const markInvoicePaid = (id) => {
+  const markInvoicePaid = (id: number) => {
     setInvoices((prev) => prev.map((inv) => inv.id === id ? { ...inv, status: "Paid" } : inv));
   };
 
