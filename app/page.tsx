@@ -55,7 +55,7 @@ const initialPurchases = [
   { id: 2, date: "2026-03-27", item: "Cat6 Cable Box", qty: 3, unitCost: 118, supplier: "ENS" },
 ];
 
-const initialMovements = [
+const initialMovements: Movement[] = [
   { id: 1, date: "2026-03-28", type: "OUT", project: "Sherman Oaks House", item: "Hikvision Camera 4MP", qty: 4, note: "Installed front and backyard" },
   { id: 2, date: "2026-03-28", type: "OUT", project: "Studio City Office", item: "Cat6 Cable Box", qty: 1, note: "Network camera wiring" },
   { id: 3, date: "2026-03-29", type: "IN", project: "Stock Refill", item: "AJAX MotionProtect", qty: 5, note: "Supplier delivery" },
@@ -435,7 +435,7 @@ export default function SmartGuardInventoryMVP() {
                     <div className="grid gap-2"><Label>Дата</Label><Input type="date" value={newMovement.date} onChange={(e) => setNewMovement({ ...newMovement, date: e.target.value })} /></div>
                     <div className="grid gap-2">
                       <Label>Тип</Label>
-                      <Select value={newMovement.type} onValueChange={(v) => setNewMovement({ ...newMovement, type: v })}>
+                      <Select value={newMovement.type} onValueChange={(v) => setNewMovement({ ...newMovement, type: v as "OUT" | "IN" })}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="OUT">OUT</SelectItem>
