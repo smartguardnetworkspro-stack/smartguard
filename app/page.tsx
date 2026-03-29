@@ -361,7 +361,7 @@ export default function SmartGuardInventoryMVP() {
                   <div className="grid gap-2"><Label>Название проекта</Label><Input value={newProject.name} onChange={(e) => setNewProject({ ...newProject, name: e.target.value })} /></div>
                   <div className="grid gap-2">
                     <Label>Клиент</Label>
-                    <Select value={String(newProject.clientId)} onValueChange={(v) => setNewProject({ ...newProject, clientId: v })}>
+                    <Select value={String(newProject.clientId)} onValueChange={(v: string) => setNewProject({ ...newProject, clientId: v })}>
                       <SelectTrigger><SelectValue placeholder="Выбери клиента" /></SelectTrigger>
                       <SelectContent>{clients.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
                     </Select>
@@ -369,7 +369,7 @@ export default function SmartGuardInventoryMVP() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="grid gap-2">
                       <Label>Статус</Label>
-                      <Select value={newProject.status} onValueChange={(v) => setNewProject({ ...newProject, status: v })}>
+                      <Select value={newProject.status} onValueChange={(v: string) => setNewProject({ ...newProject, status: v })}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Scheduled">Scheduled</SelectItem>
@@ -411,7 +411,7 @@ export default function SmartGuardInventoryMVP() {
                   <div className="grid gap-2"><Label>Дата</Label><Input type="date" value={newPurchase.date} onChange={(e) => setNewPurchase({ ...newPurchase, date: e.target.value })} /></div>
                   <div className="grid gap-2">
                     <Label>Товар</Label>
-                    <Select value={newPurchase.item} onValueChange={(v) => setNewPurchase({ ...newPurchase, item: v })}>
+                    <Select value={newPurchase.item} onValueChange={(v: string) => setNewPurchase({ ...newPurchase, item: v })}>
                       <SelectTrigger><SelectValue placeholder="Выбери товар" /></SelectTrigger>
                       <SelectContent>{items.map((item) => <SelectItem key={item.id} value={item.name}>{item.name}</SelectItem>)}</SelectContent>
                     </Select>
@@ -435,7 +435,7 @@ export default function SmartGuardInventoryMVP() {
                     <div className="grid gap-2"><Label>Дата</Label><Input type="date" value={newMovement.date} onChange={(e) => setNewMovement({ ...newMovement, date: e.target.value })} /></div>
                     <div className="grid gap-2">
                       <Label>Тип</Label>
-                      <Select value={newMovement.type} onValueChange={(v) => setNewMovement({ ...newMovement, type: v as "OUT" | "IN" })}>
+                      <Select value={newMovement.type} onValueChange={(v: string) => setNewMovement({ ...newMovement, type: v as "OUT" | "IN" })}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="OUT">OUT</SelectItem>
@@ -447,7 +447,7 @@ export default function SmartGuardInventoryMVP() {
                   <div className="grid gap-2"><Label>Проект / объект</Label><Input value={newMovement.project} onChange={(e) => setNewMovement({ ...newMovement, project: e.target.value })} placeholder="Например: Beverly Hills House" /></div>
                   <div className="grid gap-2">
                     <Label>Товар</Label>
-                    <Select value={newMovement.item} onValueChange={(v) => setNewMovement({ ...newMovement, item: v })}>
+                    <Select value={newMovement.item} onValueChange={(v: string) => setNewMovement({ ...newMovement, item: v })}>
                       <SelectTrigger><SelectValue placeholder="Выбери товар" /></SelectTrigger>
                       <SelectContent>{items.map((item) => <SelectItem key={item.id} value={item.name}>{item.name}</SelectItem>)}</SelectContent>
                     </Select>
@@ -757,7 +757,7 @@ export default function SmartGuardInventoryMVP() {
                   <div className="grid gap-3 md:grid-cols-3">
                     <div className="grid gap-2">
                       <Label>Проект</Label>
-                      <Select value={estimateProject} onValueChange={(v) => {
+                      <Select value={estimateProject} onValueChange={(v: string) => {
                         setEstimateProject(v);
                         const p = getProjectByName(v);
                         setEstimateLabor(Number(p?.labor || 0));
@@ -793,7 +793,7 @@ export default function SmartGuardInventoryMVP() {
                         return (
                           <TableRow key={r.id}>
                             <TableCell>
-                              <Select value={r.item} onValueChange={(v) => updateEstimateRow(r.id, { item: v })}>
+                              <Select value={r.item} onValueChange={(v: string) => updateEstimateRow(r.id, { item: v })}>
                                 <SelectTrigger><SelectValue placeholder="Товар" /></SelectTrigger>
                                 <SelectContent>{items.map((i) => <SelectItem key={i.id} value={i.name}>{i.name}</SelectItem>)}</SelectContent>
                               </Select>
